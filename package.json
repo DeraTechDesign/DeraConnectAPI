@@ -1,0 +1,17 @@
+{
+  "bin": "main.js",
+  "name": "DeraConnect",
+  "pkg": {
+    "scripts": [],
+    "assets": [
+      "node_modules/node-windows/bin/winsw/winsw.exe"
+    ],
+    "targets": [
+      "win"
+    ]
+  },
+  "dependencies": {
+    "app-root-dir": "^1.0.2",
+    "express": "^4.18.1"
+  }
+}
