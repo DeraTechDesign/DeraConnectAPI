@@ -268,15 +268,15 @@ function onError(data) {
   console.log( `stderr: ${data}` );
     
   if(data.indexOf("Bind")!=-1){
-    status = 2;
+    status = 3;
   }else if(data.indexOf("Port")!=-1){
-    status = 2;
+    status = 4;
   }else if(data.indexOf("windows")!=-1){
     getAddr();
   }else if(data.indexOf("Diode")!=-1){
     status = 1;
   }else if(data.indexOf("validated")!=-1){
-    status = 1;
+    status = 2;
   }
 }
 
