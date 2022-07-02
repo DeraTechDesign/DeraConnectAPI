@@ -118,6 +118,30 @@ app.listen(3000, function () {
     console.log('Diode is running on port 3000!');
 });
 
+//Bind to specified ports on specified address
+app.get('/diode/bind/:ports/:address', function (req, res) {
+  if(status == 0){
+    let ports = req.params.ports.split(',');
+    let address = req.params.address;
+    bindDiode(ports,address);
+    res.send(JSON.stringify({status:status, result:1}));
+  }else{
+    res.send(JSON.stringify({status:status, result:0}));
+  }
+});
+
+//Add BNS record
+app.get('/diode/addBNS/:bnsName', function (req, res) {
+  let bnsName = req.params.bnsName;
+  if(isValidBNSName(bnsName)){
+  addBNSRecord(bnsName);
+  res.send(JSON.stringify({status:status, result:1}));
+  }else{
+    res.send(JSON.stringify({status:status, result:0, error: "Invalid BNS Name"}));
+  }
+}
+);
+
 //starts Diode with default ports and mode
 function startDiodeCLI(){
   defaultPorts=store.get('defaultPorts').split(',');
@@ -140,6 +164,36 @@ function setDiodeFleet(fleet){
   args.push('fleet='+fleet)
   child = spawn( diodePath, args); 
   status = 3;
+  console.log(child.pid);
+  child.stdout.on( 'data', data => {
+      console.log( `stdout: ${data}` );
+  });
+  child.stderr.on( 'data', data => {
+      onError(data)
+  });
+  child.on('exit', (code) => {
+      status = 0;
+  });
+}
+
+//Checks if BNS name is valid by checking if it is longer than 8 characters
+function isValidBNSName(bnsName){
+  if(bnsName.length > 8){
+    return true;
+  }
+  return false;
+}
+
+//Bind Diode to selected port and address
+function bindDiode(ports,remoteAddress){
+  console.log("Binding Diode");
+  let args = ['-retrytimes=1']
+  args.push('-retrywait=1m')
+  args.push('-bind')
+  ports.forEach(port => {
+    args.push(port+":"+remoteAddress+":"+port)
+  });
+  child = spawn( diodePath, args); 
   console.log(child.pid);
   child.stdout.on( 'data', data => {
       console.log( `stdout: ${data}` );
@@ -184,6 +238,30 @@ function publishDiode(ports,mode,remoteAddress){
         }
 
     });
+}
+
+//Add BNS record
+function addBNSRecord(Name){
+  console.log("Adding BNS Record");
+  let args = ['-retrytimes=1']
+  args.push('-retrywait=1m')
+  args.push('bns')
+  args.push('-register')
+  args.push(Name)
+  child = spawn( diodePath, args);
+  status = 3;
+  console.log(child.pid);
+  child.stdout.on( 'data', data => {  
+      console.log( `stdout: ${data}` );
+  });
+  child.stderr.on( 'data', data => {
+      onError(data)
+  }
+  );
+  child.on('exit', (code) => {
+      status = 0;
+  }
+  );
 }
 
 function onError(data) {

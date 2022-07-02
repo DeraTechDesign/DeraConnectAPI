@@ -67,7 +67,22 @@ This can be used for App development with Diode.
 | `mode` | `Bool` | **Required**. Publish mode. Private Public or Protected |
 | `remoteAddr` | `Bool` | Remote address for Private mode |
 
+#### Bind Diode to specified ports on 
+```http
+  GET /diode/bind/:ports/:address
+```
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `ports` | `String` | **Required**. Ports to publish. Format: innerPort:outerPort, secondPort. Ex.: 8080:80,3000:4200 |
+| `remoteAddr` | `Bool` |  **Required**. Remote address|
 
+#### Add BNS record
+```http
+  GET /diode/addBNS/:bnsName
+```
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `bnsName` | `String` | **Required**. BNS name to record. Must be longer than 8 caracters. |
 
 ## Installation
 
