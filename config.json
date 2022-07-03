@@ -1,0 +1,5 @@
+{
+  "isPublishActive": "true",
+  "defaultPorts": "8080:4200",
+  "defaultMode": "public"
+}

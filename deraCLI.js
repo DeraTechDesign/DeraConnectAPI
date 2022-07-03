@@ -1,14 +1,18 @@
 //This is a Windows Service to launch diode in the background
 var express = require('express');
 var app = express();
+var store = require('nconf');
+store.use('file', { file: './config.json' });
 var status = 0;
 let killVar=0;
+
+runningClients = [];
 
 appRootDir = require('app-root-dir').get();
 if(appRootDir.indexOf("daemon")){
   appRootDir = `${appRootDir.slice(0,appRootDir.indexOf("daemon"))}`
 }
-const diodePath = appRootDir + 't/bin/diode.exe';
+const diodePath = appRootDir + 'I/bin/diode.exe';
 const spawn = require( 'child_process' ).spawn;
 let child; 
 //Stops diode
@@ -17,13 +21,6 @@ async function killDiodeCLI(){
   child.kill();
 }
 getAddr();
-if(store.get('isPublishActive') == "true"){
-  if(startDiodeCLI()){
-    console.log("Diode started");
-  }else{
-    console.log("Diode failed to start");
-  }
-}
 
 //returns address and domain of the client with get request
 app.get('/diode/address', function(req, res) {
@@ -46,6 +43,7 @@ app.get('/setPublishActive/:value', function (req, res) {
   value = req.params.value;
   if(value == "true"||value == "false"){
     store.set('isPublishActive', req.params.value);
+    store.save();
     res.send(JSON.stringify({isPublishActive: req.params.value}));
   }else{
     res.send(JSON.stringify({error: "Invalid value"}));
@@ -58,6 +56,7 @@ app.get('/setDefault/:ports/:mode/:remoteAddr', function (req, res) {
     store.set('defaultPorts', req.params.ports);
     store.set('defaultMode', req.params.mode);
     store.set('defaultRemoteAddr', req.params.remoteAddr);
+    store.save();
     res.send(JSON.stringify({defaultPorts: req.params.ports,defaultMode: req.params.mode,defaultRemoteAddr: req.params.remoteAddr}));
   }else{
     res.send(JSON.stringify({error: "Invalid Mode"}));
@@ -69,6 +68,7 @@ app.get('/setDefault/:ports/:mode/', function (req, res) {
   if(isValidMode(req.params.mode)){
     store.set('defaultPorts', req.params.ports);
     store.set('defaultMode', req.params.mode);
+    store.save();
     res.send(JSON.stringify({defaultPorts: req.params.ports,defaultMode: req.params.mode}));
   }else{
     res.send(JSON.stringify({error: "Invalid Mode"}));
@@ -114,9 +114,6 @@ app.get('/diode/:ports/:mode/:remoteAddress', function (req, res) {
       res.send(JSON.stringify({status:status, result:0,pid:child.pid}));
     }
 });
-app.listen(3000, function () {
-    console.log('Diode is running on port 3000!');
-});
 
 //Bind to specified ports on specified address
 app.get('/diode/bind/:ports/:address', function (req, res) {
@@ -141,13 +138,18 @@ app.get('/diode/addBNS/:bnsName', function (req, res) {
   }
 }
 );
+app.listen(3000, function () {
+    console.log('Diode is running on port 3000!');
+});
+
 
 //starts Diode with default ports and mode
 function startDiodeCLI(){
+  store.load();
   defaultPorts=store.get('defaultPorts').split(',');
   defaultMode=store.get('defaultMode');
   defaultRemoteAddr=store.get('defaultRemoteAddr');
-  if(!defaultPorts){
+  if(defaultPorts.length == 0){
     return false;
   }else{
     publishDiode(defaultPorts,defaultMode,defaultRemoteAddr);
@@ -165,6 +167,7 @@ function setDiodeFleet(fleet){
   child = spawn( diodePath, args); 
   status = 3;
   console.log(child.pid);
+  runningClients.push(child.pid);
   child.stdout.on( 'data', data => {
       console.log( `stdout: ${data}` );
   });
@@ -172,6 +175,8 @@ function setDiodeFleet(fleet){
       onError(data)
   });
   child.on('exit', (code) => {
+    console.log(`child process exited with code ${code}`);
+    runningClients.splice(runningClients.indexOf(child.pid),1);
       status = 0;
   });
 }
@@ -195,6 +200,7 @@ function bindDiode(ports,remoteAddress){
   });
   child = spawn( diodePath, args); 
   console.log(child.pid);
+  runningClients.push(child.pid);
   child.stdout.on( 'data', data => {
       console.log( `stdout: ${data}` );
   });
@@ -202,6 +208,8 @@ function bindDiode(ports,remoteAddress){
       onError(data)
   });
   child.on('exit', (code) => {
+    console.log(`child process exited with code ${code}`);
+    runningClients.splice(runningClients.indexOf(child.pid),1);
       status = 0;
   });
 }
@@ -221,6 +229,7 @@ function publishDiode(ports,mode,remoteAddress){
     child = spawn( diodePath, args); 
     status = 3;
     console.log(child.pid);
+    runningClients.push(child.pid);
     child.stdout.on( 'data', data => {
         console.log( `stdout: ${data}` );
     });
@@ -228,6 +237,8 @@ function publishDiode(ports,mode,remoteAddress){
         onError(data)
     });
     child.on('exit', (code) => {
+      console.log(`child process exited with code ${code}`);
+      runningClients.splice(runningClients.indexOf(child.pid),1);
         if(killVar){
           killVar=0;
           status = 0;
@@ -251,6 +262,7 @@ function addBNSRecord(Name){
   child = spawn( diodePath, args);
   status = 3;
   console.log(child.pid);
+  runningClients.push(child.pid);
   child.stdout.on( 'data', data => {  
       console.log( `stdout: ${data}` );
   });
@@ -259,6 +271,8 @@ function addBNSRecord(Name){
   }
   );
   child.on('exit', (code) => {
+    console.log(`child process exited with code ${code}`);
+    runningClients.splice(runningClients.indexOf(child.pid),1);
       status = 0;
   }
   );
@@ -290,13 +304,14 @@ function isValidMode(mode){
   }
 }
 
-
+//Gets the address of the client
 function getAddr(){
 
   let args = ['time']    
   child = spawn( diodePath, args); 
   status = 3;
-
+  console.log(child.pid);
+  runningClients.push(child.pid);
   child.stdout.on( 'data', data => {
       console.log( `stdout: ${data}` );
   });
@@ -311,6 +326,31 @@ function getAddr(){
       }
   });
   child.on('exit', (code) => {
+    console.log(`child process exited with code ${code}`);
+    runningClients.splice(runningClients.indexOf(child.pid),1);
     status = 0;
   });
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+store.load();
+setTimeout(publishOnStart, 2000);
+
+function publishOnStart(){
+  while(runningClients.length > 0){
+    console.log("Waiting for clients to exit");
+    await sleep(1000)
+  }
+  if(store.get('isPublishActive') == "true"){
+    if(startDiodeCLI()){
+      console.log("Diode started");
+    }else{
+      console.log("Diode failed to start");
+    }
+  }
 }
