@@ -92,7 +92,7 @@ app.get('/diode/stop', function (req, res) {
 });
 
 //publishes diode on the specified ports
-app.get('/diode/:ports/:mode', function (req, res) {
+app.get('/diode/publish/:ports/:mode', function (req, res) {
   if(status == 0){
     let ports = req.params.ports.split(',');
     let mode = req.params.mode;
@@ -103,7 +103,7 @@ app.get('/diode/:ports/:mode', function (req, res) {
     res.send(JSON.stringify({status:status, result:0}));
   }
 });
-app.get('/diode/:ports/:mode/:remoteAddress', function (req, res) {
+app.get('/diode/publish/:ports/:mode/:remoteAddress', function (req, res) {
     if(status == 0){
       let ports = req.params.ports.split(',');
       let mode = req.params.mode;
@@ -322,7 +322,7 @@ function getAddr(){
         }
       if(data.indexOf("Client name")!=-1){
         global.domain = `${data.slice(data.indexOf(": ")+2,data.indexOf(".diode"))}`;
-        
+        console.log(global.domain);
       }
   });
   child.on('exit', (code) => {
@@ -339,12 +339,12 @@ function sleep(ms) {
 }
 
 store.load();
-setTimeout(publishOnStart, 2000);
+setTimeout(publishOnStart, 20000);
 
-function publishOnStart(){
+async function publishOnStart(){
   while(runningClients.length > 0){
     console.log("Waiting for clients to exit");
-    await sleep(1000)
+    await sleep(10000)
   }
   if(store.get('isPublishActive') == "true"){
     if(startDiodeCLI()){

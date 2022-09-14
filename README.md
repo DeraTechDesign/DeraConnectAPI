@@ -59,7 +59,7 @@ This can be used for App development with Diode.
 
 #### Publish Diode on the specified ports
 ```http
-  GET /diode/:ports/:mode/:remoteAddress
+  GET /diode/publish/:ports/:mode/:remoteAddress
 ```
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
