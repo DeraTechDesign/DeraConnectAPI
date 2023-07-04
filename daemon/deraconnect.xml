@@ -4,9 +4,9 @@
 	<description>DeraConnect</description>
 	<executable>C:\Program Files\nodejs\node.exe</executable>
 	<argument>--harmony</argument>
-	<argument>C:\Users\4ever\AppData\Roaming\npm\node_modules\node-windows\lib\wrapper.js</argument>
+	<argument>C:\Users\tuhalf\Documents\GitHub\DeraConnectAPI\node_modules\node-windows\lib\wrapper.js</argument>
 	<argument>--file</argument>
-	<argument>C:\Users\4ever\Documents\GitHub\DeraConnectAPI\deraCLI.js</argument>
+	<argument>C:\Users\tuhalf\Documents\GitHub\DeraConnectAPI\deraCLI.js</argument>
 	<argument>--scriptoptions=</argument>
 	<argument>--log</argument>
 	<argument>DeraConnect wrapper</argument>
@@ -23,9 +23,9 @@
 	<logmode>rotate</logmode>
 	<stoptimeout>30sec</stoptimeout>
 	<serviceaccount>
-		<domain>LAPTOP-50F2E74H</domain>
+		<domain>DESKTOP-IE6POHO</domain>
 		<user>LocalSystem</user>
 		<password></password>
 	</serviceaccount>
-	<workingdirectory>C:\Users\4ever\Documents\GitHub\DeraConnectAPI</workingdirectory>
+	<workingdirectory>C:\Users\tuhalf\Documents\GitHub\DeraConnectAPI</workingdirectory>
 </service>

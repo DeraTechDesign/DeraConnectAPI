@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "app-root-dir": "^1.0.2",
+    "cors": "^2.8.5",
     "express": "^4.18.1",
-    "nconf": "^0.12.0"
+    "nconf": "^0.12.0",
+    "node-windows": "^1.0.0-beta.8"
   }
 }

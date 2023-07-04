@@ -2,9 +2,13 @@
 var express = require('express');
 var app = express();
 var store = require('nconf');
+var cors = require('cors')
 store.use('file', { file: './config.json' });
 var status = 0;
 let killVar=0;
+
+
+app.use(cors())
 
 runningClients = [];
 
