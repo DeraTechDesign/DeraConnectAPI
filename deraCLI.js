@@ -356,5 +356,12 @@ async function publishOnStart(){
     }else{
       console.log("Diode failed to start");
     }
+  }else if (store.get('isBindActive') == "true"){
+    console.log("Binding Diode");
+    store.load();
+
+    let ports = store.get('defaultPorts').split(',');
+    let address = store.get('defaultRemoteAddr');
+    bindDiode(ports,address);
   }
 }

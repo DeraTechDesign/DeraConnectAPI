@@ -1,0 +1,6 @@
+{
+  "isBindActive": "true",
+  "defaultPorts" : "3010",
+  "defaultMode" : "public",
+  "defaultRemoteAddr" : "0xd00ca0ae10ee2080d0de3583edff0f48b530021a"
+}

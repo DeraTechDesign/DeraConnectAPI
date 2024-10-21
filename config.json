@@ -1,3 +1,6 @@
 {
-  "isPublishActive": "false"
+  "isPublishActive": "true",
+  "defaultPorts" : "80",
+  "defaultMode" : "public",
+  "defaultRemoteAddr" : "0x000"
 }

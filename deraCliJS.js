@@ -67,7 +67,7 @@ class DiodeService {
       this.status = 4; // Publishing
       const parsedPorts = ports.map(Number);
       const publishOptions = { mode, remoteAddress };
-      const publishPort = new PublishPort(this.connection, parsedPorts, publishOptions);
+      const publishPort = new PublishPort(this.connection, parsedPorts, this.certPath);
       this.runningClients.push(publishPort);
       console.log(`Published ports: ${ports.join(', ')} in ${mode} mode`);
     } catch (error) {
